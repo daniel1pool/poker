@@ -18,7 +18,89 @@ body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+  background-color: seagreen;
+  padding-left: 30px;
 }
+
+.black {
+  color: black;
+}
+
+.red {
+  color: red;
+}
+
+.card {
+  padding: .1rem;
+  border-radius: 0.5rem;
+  background: var(--background);
+  box-shadow: 0 0 3rem rgba(0, 0, 0, 0.4);
+  font-size: 8em;
+  cursor: pointer;
+}
+
+.selected-card {
+  border: red;
+  border-width: 5px;
+  border-style: solid;
+}
+
+.card-deck {
+  background-color:rgb(249, 249, 250);
+  color: rgb(43, 1, 156);
+}
+
+.deck {
+  text-align: center;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.deck-label {
+  font-weight: bold;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.hand {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+  width: 50%;
+  display: inline-block;
+  margin-bottom: 50px;
+  text-align: center;
+}
+
+.hand-finish-button {
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  width: 150px;
+}
+
+.hand-finish-button-disabled {
+  background-color: rgb(139, 139, 139);
+  color: rgb(40, 40, 40);
+}
+
+.hand-finish-button-active {
+  background-color: rgb(255, 255, 255);
+  color: black;
+}
+
+.hand-finish-button-winner {
+  background-color: rgb(253, 59, 59);
+  color: black;
+}
+
+
 
 @layer utilities {
   .text-balance {
