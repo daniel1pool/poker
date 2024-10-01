@@ -30,6 +30,12 @@ body {
   color: red;
 }
 
+.no-select {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
+
 .card {
   padding: .1rem;
   border-radius: 0.5rem;
@@ -45,27 +51,21 @@ body {
   border-style: solid;
 }
 
-.card-deck {
-  background-color:rgb(249, 249, 250);
-  color: rgb(43, 1, 156);
-}
-
 .deck {
   text-align: center;
   margin-left: 10px;
   margin-right: 10px;
 }
 
+.deck-card {
+  background-color:rgb(249, 249, 250);
+  color: rgb(43, 1, 156);
+}
+
 .deck-label {
   font-weight: bold;
   -webkit-user-select: none;
   user-select: none;
-}
-
-.no-select {
-  -webkit-user-select: none; /* Safari */
-  -ms-user-select: none; /* IE 10 and IE 11 */
-  user-select: none; /* Standard syntax */
 }
 
 .hand {
@@ -103,8 +103,6 @@ body {
   font-weight: bold;
   color: black;
 }
-
-
 
 @layer utilities {
   .text-balance {

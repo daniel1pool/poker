@@ -4,19 +4,6 @@ import {Deck} from '../components/deck';
 import {Hand} from '../components/hand';
 import * as rules from './rules';
 
-// class HandData {
-//   cards: number[];
-//   isFinished: boolean;
-//   selectedCards: number[];
-//   isWinner: boolean;
-
-//   constructor(cards: number[], isFinished: boolean, selectedCards: number[], isWinner: boolean) {
-//     this.cards = cards;
-//     this.isFinished = isFinished;
-//     this.selectedCards = selectedCards;
-//     this.isWinner = isWinner;
-//   }
-// }
 export default function Home() {
 
   const deck = useRef<number[]>([]);
