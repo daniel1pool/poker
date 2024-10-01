@@ -259,6 +259,7 @@ function getHandRank(sortedHand:number[]): HandRank {
 }
 
 // gets the tie breaker to be used when two hands have the same rank
+// may result in special case ties, but that is handled later
 function getTieBreaker(rank: HandRank, sortedHand:number[]): number {
     switch (rank) {
         case HandRank.ROYAL_FLUSH:
@@ -280,7 +281,7 @@ function getTieBreaker(rank: HandRank, sortedHand:number[]): number {
 }
 
 // when the hand is a pair or two pair, the tie breaker is the face value of the highest pair
-// this may end up in a tie, but that is handled later
+// this may end up in an incorrect tie, but that is handled later
 function getTieBreakerForPair(sortedHand:number[]): number { 
     for (let i:number = sortedHand.length - 1; i > 0; i--) {
         if (cardToFaceValue(sortedHand[i]) === cardToFaceValue(sortedHand[i-1])) {
