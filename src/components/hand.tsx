@@ -4,37 +4,27 @@ import {Card} from './card';
 interface HandProps {
     cards: number[];
     handIndex: number;
-    finishHand: (cards: number[], index:number) => void;
+    finishHand: (handIndex:number) => void;
+    updateSelection: (handIndex:number, card: number) => void;
     isFinished: boolean;
-    isWinner: boolean
+    isWinner: boolean;
+    selectedCards: number[];
 }
 
-export function Hand({cards, handIndex, finishHand, isFinished, isWinner}: HandProps) {
-
-    const [selectedCards, setSelectedCards] = React.useState<number[]>([]);
+export function Hand({cards, handIndex, finishHand, isFinished, updateSelection, selectedCards, isWinner}: HandProps) {
 
     function onCardClick(card: number) {
         if (isFinished) {
             return;
         }
-        const index:number = selectedCards.indexOf(card);
-    
-        const updatedSelectedCards:number[] = selectedCards.slice();
-
-        if (index === -1) {
-            updatedSelectedCards.push(card);
-        } else {
-            updatedSelectedCards.splice(index, 1);
-        }
-        setSelectedCards(updatedSelectedCards);
+        updateSelection(handIndex, card);
     }
 
     function onFinishClick() {
         if (isFinished) {
             return;
         }
-        finishHand(selectedCards, handIndex);
-        setSelectedCards([]);
+        finishHand(handIndex);
     }
 
     let buttonLabel:string;
@@ -58,7 +48,7 @@ export function Hand({cards, handIndex, finishHand, isFinished, isWinner}: HandP
     }
 
     return (
-        <div className='hand'>
+        <div className='hand no-select'>
             <div>
             {cards.map((card, index) => {
                 const isSelected:boolean = selectedCards.includes(card);

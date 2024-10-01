@@ -40,7 +40,7 @@ body {
 }
 
 .selected-card {
-  border: red;
+  border: rgb(214, 0, 0);
   border-width: 5px;
   border-style: solid;
 }
@@ -62,10 +62,13 @@ body {
   user-select: none;
 }
 
-.hand {
+.no-select {
   -webkit-user-select: none; /* Safari */
   -ms-user-select: none; /* IE 10 and IE 11 */
   user-select: none; /* Standard syntax */
+}
+
+.hand {
   width: 50%;
   display: inline-block;
   margin-bottom: 50px;
@@ -96,7 +99,8 @@ body {
 }
 
 .hand-finish-button-winner {
-  background-color: rgb(253, 59, 59);
+  background-color: rgb(255, 0, 0);
+  font-weight: bold;
   color: black;
 }
 
