@@ -18,6 +18,21 @@ enum HandRank {
     HIGH_CARD = 1
 }
 
+
+class Score{
+    handIndex: number;
+    rank: HandRank;
+    bestCard: number;
+    hand: number[];
+
+    constructor(handIndex: number, rank: HandRank, bestCard: number, hand: number[]) {
+        this.handIndex = handIndex;
+        this.rank = rank;
+        this.bestCard = bestCard;
+        this.hand = hand;
+    }
+}
+
 // Fisher-Yates shuffle (https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle)
 export function getShuffledDeck(): number[] {
     const deck:number[] = Array.from(Array(52).keys());
@@ -36,6 +51,41 @@ export function dealFourHands(deck: number[]): [number[], number[][]] {
       hands[i%4].push(deck.pop() as number);
     }
     return [deck,hands];
+}
+
+export function findWinners(hands: number[][]): number[] {
+    const sortedHands = getSortedHands(hands);
+    
+    // try to find the winners by comparing the hands, not the individual cards
+    const scores:Score[] = sortedHands.map((hand, index) => {
+        const handRank:HandRank = getHandRank(hand);
+        return new Score(index, handRank, getTieBreaker(handRank, hand), hand);
+    })
+
+    scores.sort((lhs, rhs) =>{
+        if (lhs.rank !== rhs.rank) {
+            return rhs.rank - lhs.rank;
+        } else {
+            return rhs.bestCard - lhs.bestCard;
+        } 
+    });
+
+    // collect the winners (ties are possible)
+    let winners:Score[] = [scores[0]];
+    for (let i:number = 1; i < scores.length; i++) {
+        if (scores[i].rank === scores[0].rank && scores[i].bestCard === scores[0].bestCard) {
+            winners.push(scores[i]);
+        } else {
+            break;
+        }
+    }
+
+    // if we have ties, try and resolve by comparing the individual cards when possible
+    if (winners.length > 1) {
+        winners = edgeCaseCompare(winners, sortedHands);
+    }
+
+    return winners.map(score => score.handIndex);
 }
 
 export function cardToSuite(card: number): string {
@@ -123,7 +173,7 @@ function sortByFaceValue(cards:number[]): number[] {
     return sorted;
 }
 
-export function cardToFaceValue(card: number): number {
+function cardToFaceValue(card: number): number {
     // map numbers from 0 to 51 to face values 2 to ace
     let faceValue = card % 13;
     if (faceValue === 0) {
@@ -229,9 +279,10 @@ function getTieBreaker(rank: HandRank, sortedHand:number[]): number {
     }
 }
 
-// gets the tie breaker to be used when comparing hands of pair, or two pair
+// when the hand is a pair or two pair, the tie breaker is the face value of the highest pair
+// this may end up in a tie, but that is handled later
 function getTieBreakerForPair(sortedHand:number[]): number { 
-    for (let i = sortedHand.length - 1; i > 0; i--) {
+    for (let i:number = sortedHand.length - 1; i > 0; i--) {
         if (cardToFaceValue(sortedHand[i]) === cardToFaceValue(sortedHand[i-1])) {
             return cardToFaceValue(sortedHand[i]);
         }
@@ -239,23 +290,48 @@ function getTieBreakerForPair(sortedHand:number[]): number {
     return -1;
 }
 
-class Score{
-    handIndex: number;
-    rank: HandRank;
-    bestCard: number;
-    hand: number[];
-
-    constructor(handIndex: number, rank: HandRank, bestCard: number, hand: number[]) {
-        this.handIndex = handIndex;
-        this.rank = rank;
-        this.bestCard = bestCard;
-        this.hand = hand;
+// when rank and best card are the same, ties can be resolved for some
+// hands by comparing the individual cards
+function edgeCaseCompare(scores:Score[], cards:number[][]): Score[] {
+    const rank:HandRank = scores[0].rank;
+    if(rank === HandRank.PAIR || rank === HandRank.TWO_PAIR) {
+        return edgeCaseBaseCompare(scores, edgeCaseCompareOneOrTwoPair);
+    } else if (rank === HandRank.HIGH_CARD || rank === HandRank.FLUSH) {
+        return edgeCaseBaseCompare(scores, edgeCaseCompareHighCard);
+    } else {
+        return scores;
     }
 }
 
+// compare two hands that are pairs or two pairs, assumes that the highest pair is a tie
 function edgeCaseCompareOneOrTwoPair(sortedHandOne: number[], sortedHandTwo: number[]): number {
     // this may be overkill for two pair, but it works and avoids extra code
+    const lowPairValue:number = twoPairCompareLowPair(sortedHandOne, sortedHandTwo);
+    if (lowPairValue !== 0) {
+        return lowPairValue;
+    }
     return edgeCaseCompareHighCard(getUnmatchedCardsSorted(sortedHandOne), getUnmatchedCardsSorted(sortedHandTwo));
+}
+
+function edgeCaseCompareHighCard(handOne: number[], handTwo: number[]): number {
+    for(let i:number = handOne.length - 1; i >= 0; i--) {
+        if (cardToFaceValue(handOne[i]) !== cardToFaceValue(handTwo[i])) {
+            return cardToFaceValue(handTwo[i]) - cardToFaceValue(handOne[i]);
+        }
+    }
+    return 0;
+}
+
+function twoPairCompareLowPair(sortedHandOne: number[], sortedHandTwo: number[]): number {
+    const lowestPair = (sortedHand:number[]): number => {
+        for (let i:number = 0; i < sortedHand.length - 1; i++) {
+            if (cardToFaceValue(sortedHand[i]) === cardToFaceValue(sortedHand[i+1])) {
+                return cardToFaceValue(sortedHand[i]);
+            }
+        }
+        return 0;
+    }
+    return lowestPair(sortedHandOne) - lowestPair(sortedHandTwo);
 }
 
 function getUnmatchedCardsSorted(hand:number[]): number[] {
@@ -276,16 +352,7 @@ function getUnmatchedCardsSorted(hand:number[]): number[] {
     return uniqueCards;
 }
 
-function edgeCaseCompareHighCard(handOne: number[], handTwo: number[]): number {
-    for(let i:number = handOne.length - 1; i >= 0; i--) {
-        if (cardToFaceValue(handOne[i]) !== cardToFaceValue(handTwo[i])) {
-            return cardToFaceValue(handTwo[i]) - cardToFaceValue(handOne[i]);
-        }
-    }
-    return 0;
-}
-
-function edgeCaseBaseFind(scores:Score[], comparitor:(lhs:number[], rhs:number[]) => number): Score[] {
+function edgeCaseBaseCompare(scores:Score[], comparitor:(lhs:number[], rhs:number[]) => number): Score[] {
     let winners:Score[] = [scores[0]];
     for (let i:number = 0; i < scores.length - 1; i++) {
         const result:number = comparitor(winners[0].hand, scores[i+1].hand)
@@ -296,52 +363,4 @@ function edgeCaseBaseFind(scores:Score[], comparitor:(lhs:number[], rhs:number[]
         }
     }
     return winners;
-}
-
-// when rank and best card are the same, ties can be resolved for some
-// hands by comparing the individual cards
-function edgeCaseCompare(scores:Score[], cards:number[][]): Score[] {
-    const rank:HandRank = scores[0].rank;
-    if(rank === HandRank.PAIR || rank === HandRank.TWO_PAIR) {
-        return edgeCaseBaseFind(scores, edgeCaseCompareOneOrTwoPair);
-    } else if (rank === HandRank.HIGH_CARD || rank === HandRank.FLUSH) {
-        return edgeCaseBaseFind(scores, edgeCaseCompareHighCard);
-    } else {
-        return scores;
-    }
-}
-
-export function findWinners(hands: number[][]): number[] {
-    const sortedHands = getSortedHands(hands);
-    
-    // try to find the winners by comparing the hands, not the individual cards
-    const scores:Score[] = sortedHands.map((hand, index) => {
-        const handRank:HandRank = getHandRank(hand);
-        return new Score(index, handRank, getTieBreaker(handRank, hand), hand);
-    })
-
-    scores.sort((lhs, rhs) =>{
-        if (lhs.rank !== rhs.rank) {
-            return rhs.rank - lhs.rank;
-        } else {
-            return rhs.bestCard - lhs.bestCard;
-        } 
-    });
-
-    // collect the winners (ties are possible)
-    let winners:Score[] = [scores[0]];
-    for (let i:number = 1; i < scores.length; i++) {
-        if (scores[i].rank === scores[0].rank && scores[i].bestCard === scores[0].bestCard) {
-            winners.push(scores[i]);
-        } else {
-            break;
-        }
-    }
-
-    // if we have ties, try and resolve by comparing the individual cards when possible
-    if (winners.length > 1) {
-        winners = edgeCaseCompare(winners, sortedHands);
-    }
-
-    return winners.map(score => score.handIndex);
 }
