@@ -28,23 +28,17 @@ export function Hand({cards, handIndex, finishHand, isFinished, updateSelection,
     }
 
     let buttonLabel:string;
+    let buttonStateClass:string = ' hand-finish-button-active';
     if (isWinner) {
         buttonLabel = "Winner";
+        buttonStateClass = ' hand-finish-button-winner';
     } else if (isFinished) {
         buttonLabel = "Done";
+        buttonStateClass = ' hand-finish-button-disabled';
     } else if (selectedCards.length > 0) {
         buttonLabel = 'Discard';
     } else {
         buttonLabel = 'Stay';
-    }
-
-    let buttonClass:string = 'hand-finish-button';
-    if(isWinner) {
-        buttonClass += ' hand-finish-button-winner';
-    } else if (isFinished) {
-        buttonClass += ' hand-finish-button-disabled';
-    } else {
-        buttonClass += ' hand-finish-button-active';
     }
 
     return (
@@ -55,7 +49,7 @@ export function Hand({cards, handIndex, finishHand, isFinished, updateSelection,
                 return <Card value={card} key={index} onCardClick={onCardClick} selected={isSelected}/>
             })}
             </div>
-            {cards.length > 0 && <button onClick={onFinishClick} className={buttonClass}>{buttonLabel}</button>}
+            {cards.length > 0 && <button onClick={onFinishClick} className={`hand-finish-button${buttonStateClass}`}>{buttonLabel}</button>}
         </div>
     );
 }
