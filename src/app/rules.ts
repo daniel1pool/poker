@@ -92,6 +92,8 @@ export function cardToSuite(card: number): string {
     return 'NOT FOUND';
 }
 
+// this is a display function, so it is not used in the game logic
+// but moving it to display layer exposes internals of the game logic.
 export function cardToString(card: number): string {
     const suite:string = cardToSuite(card);
     let base:number = 0;
@@ -116,7 +118,8 @@ export function cardToString(card: number): string {
     return String.fromCodePoint(base + offset);
 }
 
-// create a card for testing - this is a test only helper function
+// create a card for testing (cft) - this is a test only helper function
+// it is not used in the game logic, but moving it to test layer exposes internals of the game logic.
 export function cft(faceValue: string, suite: Suite): number {
     let base:number = 0;
     switch (suite) {
@@ -282,7 +285,7 @@ function getTieBreaker(rank: HandRank, sortedHand:number[]): number {
 }
 
 // when the hand is a pair or two pair, the tie breaker is the face value of the highest pair
-// this may end up in an incorrect tie, but that is handled later
+// this may end up in an incorrect tie when face values of the highest pair match, but that is handled later
 function getTieBreakerForPair(sortedHand:number[]): number { 
     for (let i:number = sortedHand.length - 1; i > 0; i--) {
         if (cardToFaceValue(sortedHand[i]) === cardToFaceValue(sortedHand[i-1])) {
@@ -291,6 +294,12 @@ function getTieBreakerForPair(sortedHand:number[]): number {
     }
     return -1;
 }
+
+/*
+    The remainder of the code is used for handling edge cases where the rank and best card are the same.
+    This happens with pairs, two pairs, high card, and flushes. In these cases, the individual cards are compared.
+    I think that this code could be simplified, but I don't see how to do it. This could/should be revisted.
+*/
 
 // when rank and best card are the same, ties can be resolved for some
 // hands by comparing the individual cards
