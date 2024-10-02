@@ -103,7 +103,7 @@ export function cardToSuite(card: number): string {
 
 export function cardToString(card: number): string {
     const suite:string = cardToSuite(card);
-    let base: number = 0;
+    let base:number = 0;
     switch (suite) {
         case Suite.SPADES:
             base = 0x1F0A1;
@@ -118,7 +118,7 @@ export function cardToString(card: number): string {
             base = 0x1F0D1;
             break;
     }
-    let offset = card % 13;
+    let offset:number = card % 13;
     if (offset > 10) {
         offset += 1;
     }
@@ -127,7 +127,7 @@ export function cardToString(card: number): string {
 
 // create a card for testing - this is a test only helper function
 export function cft(faceValue: string, suite: Suite): number {
-    let base: number = 0;
+    let base:number = 0;
     switch (suite) {
         case Suite.SPADES:
             base = 0;
@@ -142,7 +142,7 @@ export function cft(faceValue: string, suite: Suite): number {
             base = 39;
             break;
     }
-    let card = 0;
+    let card:number = 0;
     switch (faceValue) {
         case 'J':
             card = 10;
@@ -175,7 +175,7 @@ function sortByFaceValue(cards:number[]): number[] {
 
 function cardToFaceValue(card: number): number {
     // map numbers from 0 to 51 to face values 2 to ace
-    let faceValue = card % 13;
+    let faceValue:number = card % 13;
     if (faceValue === 0) {
         faceValue = 13; // aces are high
     }
