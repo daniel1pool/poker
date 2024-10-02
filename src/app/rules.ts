@@ -304,9 +304,9 @@ function edgeCaseCompare(scores:Score[]): Score[] {
     }
 }
 
-// compare two hands that are pairs or two pairs, assumes that the highest pair is a tie
+// compare two hands that are one pair or two pairs, for two pair we have already determined highest pair is a tie.
 function edgeCaseCompareOneOrTwoPair(sortedHandOne: number[], sortedHandTwo: number[]): number {
-    // this may be overkill for two pair, but it works and avoids extra code
+    // in case of one pair the low pair is also the high pair.
     const lowPairValue:number = twoPairCompareLowPair(sortedHandOne, sortedHandTwo);
     if (lowPairValue !== 0) {
         return lowPairValue;
