@@ -32,19 +32,10 @@ class Score{
         this.hand = hand;
     }
 }
-
-// Fisher-Yates shuffle (https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle)
-export function getShuffledDeck(): number[] {
-    const deck:number[] = Array.from(Array(52).keys());
-    for (let i:number = deck.length - 1; i > 0; i--) { 
-      const j = Math.floor(Math.random() * (i + 1)); 
-      [deck[i], deck[j]] = [deck[j], deck[i]]; 
-    } 
-    return deck; 
-}
   
-export function dealFourHands(deck: number[]): [number[], number[][]] {
+export function dealFourHands(): [number[], number[][]] {
     const hands:number[][] = [[], [], [], []];
+    const deck:number[] = getShuffledDeck();
     // deal 5 cards to each player, in proper order.
     // note that the order doesn't actually matter, but this is how the game is played.
     for (let i:number = 0; i < 20; i++) {
@@ -161,6 +152,16 @@ export function cft(faceValue: string, suite: Suite): number {
             break;
     }
     return base + card;
+}
+
+// Fisher-Yates shuffle (https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle)
+function getShuffledDeck(): number[] {
+    const deck:number[] = Array.from(Array(52).keys());
+    for (let i:number = deck.length - 1; i > 0; i--) { 
+      const j = Math.floor(Math.random() * (i + 1)); 
+      [deck[i], deck[j]] = [deck[j], deck[i]]; 
+    } 
+    return deck; 
 }
 
 function getSortedHands(hands: number[][]): number[][] {

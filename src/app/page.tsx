@@ -14,7 +14,7 @@ export default function Home() {
   const [winners, setWinners] = React.useState<number[]>([]);
 
   function onDeckClick ()  {
-    const [newDeck, newHands] = rules.dealFourHands(rules.getShuffledDeck());
+    const [newDeck, newHands] = rules.dealFourHands();
     deck.current = newDeck;
     setHands(newHands);
     setIsHandFinished([false, false, false, false]);
