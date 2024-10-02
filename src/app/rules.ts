@@ -298,7 +298,7 @@ function getTieBreakerForPair(sortedHand:number[]): number {
 /*
     The remainder of the code is used for handling edge cases where the rank and best card are the same.
     This happens with pairs, two pairs, high card, and flushes. In these cases, the individual cards are compared.
-    I think that this code could be simplified, but I don't see how to do it. This could/should be revisted.
+    I think that this code could be simplified, but right now I don't see how to do it. This could/should be revisted.
 */
 
 // when rank and best card are the same, ties can be resolved for some
