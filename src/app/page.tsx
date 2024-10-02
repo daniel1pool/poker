@@ -24,7 +24,7 @@ export default function Home() {
 
   function finishHand(handIndex: number) {
     // replace discards with new cards from the deck
-    let discards = selectedCards[handIndex];
+    const discards:number[] = selectedCards[handIndex];
     if (discards.length !== 0) {
         const updatedHands:number[][] = hands.map(hand => hand.map(card => {
           return !discards.includes(card) ? card : deck.current.pop() as number;

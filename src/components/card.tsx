@@ -14,10 +14,9 @@ export function Card({value, onCardClick, selected}: CardProps){
         onCardClick(value);
     }
     
-    let unicodeChar = cardToString(value);
-    let suite = cardToSuite(value);
-    let colorClass = suite === Suite.SPADES || suite === Suite.CLUBS ? ' black' : ' red';
-    let selectedClass = selected ? ' selected-card' : '';
-    let classes = `card${colorClass}${selectedClass}`;
-    return <span onClick={onClick} className={classes}>{unicodeChar}</span>
+    const suite = cardToSuite(value);
+    const colorClass = (suite === Suite.SPADES || suite === Suite.CLUBS) ? ' black' : ' red';
+    const selectedClass = selected ? ' selected-card' : '';
+    const classes = `card${colorClass}${selectedClass}`;
+    return <span onClick={onClick} className={classes}>{ cardToString(value)}</span>
 }

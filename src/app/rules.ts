@@ -82,7 +82,7 @@ export function findWinners(hands: number[][]): number[] {
 
     // if we have ties, try and resolve by comparing the individual cards when possible
     if (winners.length > 1) {
-        winners = edgeCaseCompare(winners, sortedHands);
+        winners = edgeCaseCompare(winners);
     }
 
     return winners.map(score => score.handIndex);
@@ -293,7 +293,7 @@ function getTieBreakerForPair(sortedHand:number[]): number {
 
 // when rank and best card are the same, ties can be resolved for some
 // hands by comparing the individual cards
-function edgeCaseCompare(scores:Score[], cards:number[][]): Score[] {
+function edgeCaseCompare(scores:Score[]): Score[] {
     const rank:HandRank = scores[0].rank;
     if(rank === HandRank.PAIR || rank === HandRank.TWO_PAIR) {
         return edgeCaseBaseCompare(scores, edgeCaseCompareOneOrTwoPair);
