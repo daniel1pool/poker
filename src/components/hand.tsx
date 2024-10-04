@@ -1,5 +1,8 @@
 import React from 'react';
 import {Card} from './card';
+import * as rules from '../app/rules';
+
+
 
 interface HandProps {
     cards: number[];
@@ -41,8 +44,10 @@ export function Hand({cards, handIndex, finishHand, isFinished, updateSelection,
         buttonLabel = 'Stay';
     }
 
+
     return (
         <div className='hand no-select'>
+            
             <div>
             {cards.map((card, index) => {
                 const isSelected:boolean = selectedCards.includes(card);

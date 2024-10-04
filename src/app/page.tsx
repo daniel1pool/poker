@@ -18,8 +18,24 @@ export default function Home() {
     deck.current = newDeck;
     setHands(newHands);
     setIsHandFinished([false, false, false, false]);
-    setSelectedCards([[],[],[],[],[]]);
+
+
+    selectDiscards(newHands);
     setWinners([]);
+  }
+
+  function selectDiscards(newHands: number[][]) {
+    let newSelection: number[][] = [[], [], [], [], []];
+    for (let i = 0; i < 4; i++) {
+      let winners = rules.getWinningCards(newHands[i]);
+
+      for (let card of newHands[i]) {
+        if (!winners.includes(card)) {
+          newSelection[i].push(card);
+        }
+      }
+    }
+    setSelectedCards(newSelection);
   }
 
   function finishHand(handIndex: number) {

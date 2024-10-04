@@ -41,6 +41,7 @@ export function dealFourHands(): [number[], number[][]] {
     for (let i:number = 0; i < 20; i++) {
       hands[i%4].push(deck.pop() as number);
     }
+
     return [deck,hands];
 }
 
@@ -49,7 +50,7 @@ export function findWinners(hands: number[][]): number[] {
     
     // try to find the winners by comparing the hands, not the individual cards
     const scores:Score[] = sortedHands.map((hand, index) => {
-        const handRank:HandRank = getHandRank(hand);
+        const [handRank,_]= getHandRank(hand);
         return new Score(index, handRank, getTieBreaker(handRank, hand), hand);
     })
 
@@ -177,7 +178,7 @@ function sortByFaceValue(cards:number[]): number[] {
     return sorted;
 }
 
-function cardToFaceValue(card: number): number {
+export function cardToFaceValue(card: number): number {
     // map numbers from 0 to 51 to face values 2 to ace
     let faceValue:number = card % 13;
     if (faceValue === 0) {
@@ -186,81 +187,146 @@ function cardToFaceValue(card: number): number {
     return faceValue;
 }
 
-function isFlush(cards:number[]): boolean {
+function getFlush(cards:number[]): number[] {
     const suite:string = cardToSuite(cards[0]);
-    return cards.every(card => cardToSuite(card) === suite);
+    if (cards.every(card => cardToSuite(card) === suite)) {
+        return cards;
+    }
+    return [];
 }
 
-function isStraight(sortedHand:number[]): boolean {
+function getStraight(sortedHand:number[]): number[] {
     for (let i:number = 1; i < sortedHand.length; i++) {
         if (cardToFaceValue(sortedHand[i]) !== cardToFaceValue(sortedHand[i-1]) + 1) {
-            return false;
+            return [];
         }
     }
-    return true;
+    return sortedHand;
 }
 
-function isStraightFlush(sortedHand:number[]): boolean {
-    return isFlush(sortedHand) && isStraight(sortedHand);
+function getSraightFlush(sortedHand:number[]): number[] {
+    return getFlush(sortedHand).length != 0 && getStraight(sortedHand).length != 0 ? sortedHand : [];
 }
 
 // technically, a royal flush is a straight flush from 10 to Ace, so this is redundant,
 // but I still like to see it explicitly
-function isRoyalFlush(sortedHand:number[]): boolean {
-    return isStraightFlush(sortedHand) && cardToFaceValue(sortedHand[0]) === 9;
+function getRoyalFlush(sortedHand:number[]): number[] {
+    return getSraightFlush(sortedHand).length != 0 && cardToFaceValue(sortedHand[0]) === 9 ? sortedHand : [];
 }
 
-function isFourOfAKind(sortedHand:number[]): boolean {
-    return cardToFaceValue(sortedHand[0]) === cardToFaceValue(sortedHand[3]) || cardToFaceValue(sortedHand[1]) === cardToFaceValue(sortedHand[4]);
-}
-
-function isFullHouse(sortedHand:number[]): boolean {
-    return (cardToFaceValue(sortedHand[0]) === cardToFaceValue(sortedHand[2]) && cardToFaceValue(sortedHand[3]) === cardToFaceValue(sortedHand[4])) ||
-           (cardToFaceValue(sortedHand[0]) === cardToFaceValue(sortedHand[1]) && cardToFaceValue(sortedHand[2]) === cardToFaceValue(sortedHand[4]));
-}
-
-function isThreeOfAKind(sortedHand:number[]): boolean {
-    return  cardToFaceValue(sortedHand[0]) === cardToFaceValue(sortedHand[2]) || 
-            cardToFaceValue(sortedHand[1]) === cardToFaceValue(sortedHand[3]) || 
-            cardToFaceValue(sortedHand[2]) === cardToFaceValue(sortedHand[4]);
-}
-
-function isTwoPair(sortedHand:number[]): boolean {
-    return (cardToFaceValue(sortedHand[0]) === cardToFaceValue(sortedHand[1]) && cardToFaceValue(sortedHand[2]) === cardToFaceValue(sortedHand[3])) ||
-           (cardToFaceValue(sortedHand[0]) === cardToFaceValue(sortedHand[1]) && cardToFaceValue(sortedHand[3]) === cardToFaceValue(sortedHand[4])) ||
-           (cardToFaceValue(sortedHand[1]) === cardToFaceValue(sortedHand[2]) && cardToFaceValue(sortedHand[3]) === cardToFaceValue(sortedHand[4]));
-}
-
-function isPair(sortedHand:number[]): boolean {
-    return  cardToFaceValue(sortedHand[0]) === cardToFaceValue(sortedHand[1]) || 
-            cardToFaceValue(sortedHand[1]) === cardToFaceValue(sortedHand[2]) || 
-            cardToFaceValue(sortedHand[2]) === cardToFaceValue(sortedHand[3]) || 
-            cardToFaceValue(sortedHand[3]) === cardToFaceValue(sortedHand[4]);
-}
-
-function getHandRank(sortedHand:number[]): HandRank {
-    if (isRoyalFlush(sortedHand)) {
-        return HandRank.ROYAL_FLUSH;
-    } else if (isStraightFlush(sortedHand)) {
-        return HandRank.STRAIGHT_FLUSH;
-    } else if (isFourOfAKind(sortedHand)) {
-        return HandRank.FOUR_OF_A_KIND;
-    } else if (isFullHouse(sortedHand)) {
-        return HandRank.FULL_HOUSE;
-    } else if (isFlush(sortedHand)) {
-        return HandRank.FLUSH;
-    } else if (isStraight(sortedHand)) {
-        return HandRank.STRAIGHT;
-    } else if (isThreeOfAKind(sortedHand)) {
-        return HandRank.THREE_OF_A_KIND;
-    } else if (isTwoPair(sortedHand)) {
-        return HandRank.TWO_PAIR;
-    } else if (isPair(sortedHand)) {
-        return HandRank.PAIR;
-    } else {
-        return HandRank.HIGH_CARD;
+function getFourOfAKind(sortedHand:number[]): number[] {
+    if (cardToFaceValue(sortedHand[0]) === cardToFaceValue(sortedHand[3])) {
+        return sortedHand.slice(0,4);
+    } else if (cardToFaceValue(sortedHand[1]) === cardToFaceValue(sortedHand[4])) {
+        return sortedHand.slice(1,5);
     }
+    return [];
 }
+
+function getFullHouse(sortedHand:number[]): number[] {
+    
+    if ((cardToFaceValue(sortedHand[0]) === cardToFaceValue(sortedHand[2]) && cardToFaceValue(sortedHand[3]) === cardToFaceValue(sortedHand[4])) ||  
+            (cardToFaceValue(sortedHand[0]) === cardToFaceValue(sortedHand[1]) && cardToFaceValue(sortedHand[2]) === cardToFaceValue(sortedHand[4]))) {
+        return sortedHand;
+    }
+
+    return [];
+}
+
+function getThreeOfAKind(sortedHand:number[]): number[] {
+    if (cardToFaceValue(sortedHand[0]) === cardToFaceValue(sortedHand[2])) {
+        return sortedHand.slice(0,3);
+    } else if (cardToFaceValue(sortedHand[1]) === cardToFaceValue(sortedHand[3])) {
+        return sortedHand.slice(1,4);
+    } else if (cardToFaceValue(sortedHand[2]) === cardToFaceValue(sortedHand[4])) {
+        return sortedHand.slice(2,5);
+    }
+    return [];
+}
+
+function getTwoPair(sortedHand:number[]): number[] {
+    if (cardToFaceValue(sortedHand[0]) === cardToFaceValue(sortedHand[1]) && cardToFaceValue(sortedHand[2]) === cardToFaceValue(sortedHand[3])) {
+        return [sortedHand[0],sortedHand[1],sortedHand[2],sortedHand[3]]
+    } else if (cardToFaceValue(sortedHand[0]) === cardToFaceValue(sortedHand[1]) && cardToFaceValue(sortedHand[3]) === cardToFaceValue(sortedHand[4])) {
+        return [sortedHand[0],sortedHand[1],sortedHand[3],sortedHand[4]]
+    } else if (cardToFaceValue(sortedHand[1]) === cardToFaceValue(sortedHand[2]) && cardToFaceValue(sortedHand[3]) === cardToFaceValue(sortedHand[4])) {
+        return [sortedHand[1],sortedHand[2],sortedHand[3],sortedHand[4]]
+    }
+    return []
+}
+
+function getPair(sortedHand:number[]): number[] {
+    if (cardToFaceValue(sortedHand[0]) === cardToFaceValue(sortedHand[1])) {
+        return([sortedHand[0], sortedHand[1]]);
+    } else if (cardToFaceValue(sortedHand[1]) === cardToFaceValue(sortedHand[2])) {
+        return([sortedHand[1], sortedHand[2]]);
+    } else if (cardToFaceValue(sortedHand[2]) === cardToFaceValue(sortedHand[3])) { 
+        return([sortedHand[2], sortedHand[3]]);
+    } else if (cardToFaceValue(sortedHand[3]) === cardToFaceValue(sortedHand[4])) {
+        return([sortedHand[3], sortedHand[4]]);
+    }
+    
+    return [];        
+}
+
+
+export function getWinningCards(hand:number[]): number[] {
+    
+    let [_,winners] = getHandRank(sortByFaceValue(hand));
+    return winners;
+}
+
+function getHandRank(sortedHand:number[]): [HandRank, number[]] {
+
+    let winners = [];
+    winners = getRoyalFlush(sortedHand);
+    if (winners.length != 0) {
+        return [HandRank.ROYAL_FLUSH, winners];
+    }
+    
+    winners = getSraightFlush(sortedHand);
+    if (winners.length != 0) {
+        return [HandRank.STRAIGHT_FLUSH, winners];
+    }
+        
+    winners = getFourOfAKind(sortedHand);
+    if (winners.length != 0) {
+        return [HandRank.FOUR_OF_A_KIND, winners];
+    }
+    
+    winners = getFullHouse(sortedHand);
+    if (winners.length != 0) {
+        return [HandRank.FULL_HOUSE, winners];
+    }
+
+    winners = getFlush(sortedHand);
+    if (winners.length != 0) {
+        return [HandRank.FLUSH, winners];
+    }
+    
+    winners = getStraight(sortedHand);
+    if (winners.length != 0) {
+        return [HandRank.STRAIGHT, winners];
+    }
+    
+    winners = getThreeOfAKind(sortedHand);
+    if (winners.length != 0) {
+        return [HandRank.THREE_OF_A_KIND, winners];
+    }
+    
+    winners = getTwoPair(sortedHand);
+    if (winners.length != 0) {
+        return [HandRank.TWO_PAIR, winners];
+    }
+    
+    winners = getPair(sortedHand);
+    if (winners.length != 0) {
+        return [HandRank.PAIR, winners];
+    }
+
+    let faceValue = cardToFaceValue(sortedHand[sortedHand.length - 1]);
+    return [HandRank.HIGH_CARD, [sortedHand[sortedHand.length - 1]]];
+} 
 
 // gets the tie breaker to be used when two hands have the same rank
 // may result in special case ties, but that is handled later
@@ -342,7 +408,7 @@ function twoPairCompareLowPair(sortedHandOne: number[], sortedHandTwo: number[])
         }
         return 0;
     }
-    return lowestPair(sortedHandOne) - lowestPair(sortedHandTwo);
+    return  lowestPair(sortedHandTwo) - lowestPair(sortedHandOne);
 }
 
 function getUnmatchedCardsSorted(hand:number[]): number[] {
